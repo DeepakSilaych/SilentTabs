@@ -12,7 +12,12 @@ The "Silent Tabs" Chrome extension optimizes your browsing experience by intelli
 
 ## How to Use
 
-1. **Install the Extension:** Get it from the [Chrome Web Store](#insert-web-store-link).
+1. **Install the Extension:** To use the extension, download the code and load it as an unpacked extension in Chrome. Follow these steps:
+   - Clone or download the repository.
+   - Open Chrome and go to `chrome://extensions/`.
+   - Enable "Developer mode" in the top right.
+   - Click "Load unpacked" and select the extension directory.
+
 2. **Enjoy Seamless Browsing:** Let the extension manage video playback for an optimized experience.
 
 ## Developer Insights
@@ -21,7 +26,7 @@ This extension is built using Chrome's extension APIs, including `chrome.tabs`, 
 
 ## Feedback and Support
 
-We welcome your feedback and suggestions! Feel free to reach out through the [Chrome Web Store](#insert-web-store-link) or our support channels.
+We welcome your feedback and suggestions! Feel free to reach out through the [GitHub repository](#insert-github-repo-link) or our support channels.
 
 ## Privacy Notice
 
@@ -34,4 +39,3 @@ We welcome your feedback and suggestions! Feel free to reach out through the [Ch
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-
