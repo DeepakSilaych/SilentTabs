@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Silent Tabs",
+  "version": "1.0",
+  "description": "Pause videos in inactive tabs to save CPU and battery power.",
+  "permissions": ["tabs", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "48": "icon.jpg"
+  },
+  "action": {
+    "default_icon": "icon.jpg",
+    "default_popup": "popup.html"
+  }
+}
