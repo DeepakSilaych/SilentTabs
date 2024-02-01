@@ -35,7 +35,3 @@ We welcome your feedback and suggestions! Feel free to reach out through the [Gi
 ## Changelog
 
 - **Version 1.0:** Initial release.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
