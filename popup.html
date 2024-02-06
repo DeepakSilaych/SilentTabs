@@ -40,14 +40,27 @@
             color: #ffcc00;
             text-decoration: none;
         }
+
+        select {
+            margin-top: 10px;
+            padding: 5px;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
     <h2>Silent Tabs</h2>
     <p>This extension helps you maintain focus by pausing videos in inactive tabs.</p>
+    <select id="toggleBehavior">
+        <option value="smartPausing">Smart Pausing</option>
+        <option value="playOneAtATime">Play One Video at a Time</option>
+    </select>
     <hr>
     <footer>
         Developed by: <a href="https://www.deepaksilaych.tech/" target="_blank">Deepak Silaych</a>
     </footer>
+    <script src="popup.js"></script>
 </body>
 </html>

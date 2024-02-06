@@ -1,3 +1,37 @@
+/**
+ * background.js
+ * This script runs in the background of the extension and manages the video playback functionality.
+ */
+
+// Define a variable to store the currently selected behavior
+let selectedBehavior = 'smartPausing'; // Default behavior
+
+// Function to pause videos in inactive tabs
+function pauseVideos(tabId) {
+  chrome.tabs.sendMessage(tabId, { action: 'pause' });
+}
+
+// Function to resume videos in active tabs
+function resumeVideos(tabId) {
+  chrome.tabs.sendMessage(tabId, { action: 'resume' });
+}
+
+// Function to handle state updates based on selected behavior
+function handleStateUpdate(tabId, state) {
+  if (selectedBehavior === 'playOneAtATime') {
+    if (state === 'resumed') {
+      chrome.tabs.query({}, function(tabs) {
+        tabs.forEach(function(tab) {
+          if (tab.id !== tabId) {
+            pauseVideos(tab.id);
+          }
+        });
+      });
+    }
+  }
+}
+
+// Service worker registration
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/service-worker.js')
     .then((registration) => {
@@ -8,90 +42,23 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-let currentPlayingTabId = null;
-
+// Listener for tab activation
 chrome.tabs.onActivated.addListener(function(activeInfo) {
-  currentPlayingTabId = activeInfo.tabId;
   chrome.tabs.query({}, function(tabs) {
     tabs.forEach(function(tab) {
-      if (tab.id !== activeInfo.tabId) {
-        chrome.tabs.sendMessage(tab.id, { action: 'checkAndPause', currentTabId: activeInfo.tabId });
-      }
+      chrome.tabs.sendMessage(tab.id, { action: (tab.id === activeInfo.tabId) ? 'resume' : 'pause' });
     });
   });
 });
 
+// Listener for messages from content scripts
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === 'setPlayingTabId') {
-    currentPlayingTabId = request.tabId;
-  }
-});
-
-function pauseVideosInOtherTabs(currentTabId) {
-  chrome.tabs.query({}, function(tabs) {
-    tabs.forEach(function(tab) {
-      if (tab.id !== currentTabId) {
-        chrome.tabs.sendMessage(tab.id, { action: 'pause' });
-      }
-    });
-  });
-}
-
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === 'pause') {
-    pauseVideos(sender.tab.id);
-  } else if (request.action === 'resume') {
-    resumeVideos(sender.tab.id);
-  } else if (request.action === 'updateState') {
+  if (request.action === 'updateState') {
     handleStateUpdate(sender.tab.id, request.state);
-  } else if (request.action === 'checkAndPause') {
-    const video = document.querySelector('video');
-    if (video && !video.paused) {
-      chrome.runtime.sendMessage({ action: 'setPlayingTabId', tabId: request.currentTabId });
-    }
+  } else if (request.action === 'changeBehavior') {
+    // Update the selected behavior based on user selection
+    selectedBehavior = request.behavior;
+    // Save the selected behavior to Chrome storage for persistence
+    chrome.storage.local.set({ selectedBehavior: selectedBehavior });
   }
 });
-
-function pauseVideos(tabId) {
-  const video = document.querySelector('video');
-  if (video && !video.paused) {
-    video.pause();
-    updateTabState(tabId, 'paused');
-    showNotification('Video Paused', `Paused video in tab ${tabId}`);
-  }
-}
-
-function resumeVideos(tabId) {
-  const video = document.querySelector('video');
-  if (video && video.paused) {
-    video.play();
-    updateTabState(tabId, 'resumed');
-    showNotification('Video Resumed', `Resumed video in tab ${tabId}`);
-  }
-}
-
-function updateTabState(tabId, state) {
-  chrome.storage.local.get(['tabStates'], function(result) {
-    const tabStates = result.tabStates || {};
-    tabStates[tabId] = state;
-    chrome.storage.local.set({ tabStates: tabStates });
-  });
-}
-
-function handleStateUpdate(tabId, state) {
-  if (state === 'paused') {
-    pauseVideos(tabId);
-  } else if (state === 'resumed') {
-    resumeVideos(tabId);
-  }
-  console.log(`background.js loaded ${tabId}`);
-}
-
-function showNotification(title, message) {
-  chrome.notifications.create('', {
-    type: 'basic',
-    iconUrl: 'icon.jpg',
-    title: title,
-    message: message,
-  });
-}
