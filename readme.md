@@ -35,3 +35,4 @@ We welcome your feedback and suggestions! Feel free to reach out through the [Gi
 ## Changelog
 
 - **Version 1.0:** Initial release.
+- **Version 2.0:** Added support for "Play One Video at a Time" mode.
