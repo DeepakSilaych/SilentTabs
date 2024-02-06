@@ -8,15 +8,35 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+let currentPlayingTabId = null;
+
 chrome.tabs.onActivated.addListener(function(activeInfo) {
+  currentPlayingTabId = activeInfo.tabId;
   chrome.tabs.query({}, function(tabs) {
     tabs.forEach(function(tab) {
-      chrome.tabs.sendMessage(tab.id, { action: (tab.id === activeInfo.tabId) ? 'resume' : 'pause' });
+      if (tab.id !== activeInfo.tabId) {
+        chrome.tabs.sendMessage(tab.id, { action: 'checkAndPause', currentTabId: activeInfo.tabId });
+      }
     });
   });
 });
 
-// Listen for messages from content scripts
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.action === 'setPlayingTabId') {
+    currentPlayingTabId = request.tabId;
+  }
+});
+
+function pauseVideosInOtherTabs(currentTabId) {
+  chrome.tabs.query({}, function(tabs) {
+    tabs.forEach(function(tab) {
+      if (tab.id !== currentTabId) {
+        chrome.tabs.sendMessage(tab.id, { action: 'pause' });
+      }
+    });
+  });
+}
+
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'pause') {
     pauseVideos(sender.tab.id);
@@ -24,6 +44,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     resumeVideos(sender.tab.id);
   } else if (request.action === 'updateState') {
     handleStateUpdate(sender.tab.id, request.state);
+  } else if (request.action === 'checkAndPause') {
+    const video = document.querySelector('video');
+    if (video && !video.paused) {
+      chrome.runtime.sendMessage({ action: 'setPlayingTabId', tabId: request.currentTabId });
+    }
   }
 });
 

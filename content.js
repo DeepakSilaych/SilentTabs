@@ -1,5 +1,3 @@
-// content.js
-
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'pause') {
     pauseVideos();
@@ -27,3 +25,12 @@ function resumeVideos() {
 function updateTabState(state) {
   chrome.runtime.sendMessage({ action: 'updateState', state });
 }
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.action === 'checkAndPause') {
+    const video = document.querySelector('video');
+    if (video && !video.paused) {
+      chrome.runtime.sendMessage({ action: 'setPlayingTabId', tabId: request.currentTabId });
+    }
+  }
+});
